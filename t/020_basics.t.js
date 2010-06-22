@@ -33,11 +33,11 @@ StartTest(function(t) {
             if (this.param == 'value1')     methods.append = function (p1) { return p1 + '1' }
             if (this.param == 'value2')     methods.append = function (p1) { return p1 + '2' }
         
-            return Role({
+            return {
                 trait   : SomeTrait,
                 
                 methods : methods
-            })
+            }
         }})
         
         
