@@ -11,58 +11,39 @@ StartTest(function(t) {
         
         t.ok(JooseX.Meta.Parameterized, "JooseX.Meta.Parameterized is here")
         
-        Role.Parameterized('RoleName', function (param1, param2, ...) {
-        
-            var methods = param1 == param2 ? {
-                method : function (p1) {
-                    ...
-                }
-            } : {
-                method : function (p1, p2) {
-                    ...
-                }
-            }
-        
-            return Role({
-                methods : methods
-            })
-        
-        })
-        
-        Class('Parameterized.Class', {
+
         Role('Parameterized.Role', {
             
-            trait : JooseX.Meta.Parameterized,
+            meta : JooseX.Meta.Parameterized,
             
-            use : 'Some.Thing',
+            has : {
+                param : null
+            },
+            
             
         role : function (self, consumer) {
             
-            var methods = param1 == param2 ? {
-                method : function (p1) {
-                    ...
-                }
-            } : {
-                method : function (p1, p2) {
-                    ...
-                }
-            }
+            t.ok(self == this, '`role` function is being called as the method of the parameter instance')
+            
+            var methods = {}
+            
+            if (this.param == 'value1')     methods.append = function (p1) { return p1 + '1' }
+            if (this.param == 'value2')     methods.append = function (p1) { return p1 + '2' }
         
             return Role({
                 methods : methods
             })
-            
         }})
         
         
-        Class('ClassName', {
-        
-            does : [ Parameterized.Role(value1, value2) ]
-        
+        Class('ClassName1', {
+            does : Parameterized.Role({ param : 'value1' })
         })         
+
         
-        var parameterizedClass = Parameterized.Class(value1, value2)
-        
+        Class('ClassName2', {
+            does : Parameterized.Role({ param : 'value2' })
+        })         
         
         t.endAsync(async0)
     })
