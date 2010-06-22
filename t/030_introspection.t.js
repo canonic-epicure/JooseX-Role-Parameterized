@@ -4,46 +4,83 @@ StartTest(function(t) {
     
     var async0 = t.beginAsync()
     
-    use('JooseX.Meta.Parameterized', function () {
+    use('JooseX.Role.Parameterized', function () {
         
         //======================================================================================================================================================================================================================================================
         t.diag('Sanity')
         
-        t.ok(JooseX.Meta.Parameterized, "JooseX.Meta.Parameterized is here")
+        t.ok(JooseX.Role.Parameterized, "JooseX.Role.Parameterized is here")
+        
+        var log = []
         
 
         Role('Parameterized.Role', {
             
-            meta : JooseX.Meta.Parameterized,
+            meta : JooseX.Role.Parameterized,
             
             has : {
-                param : null
+                regex   : null
             },
+            
+            introspect : true,
             
             
         role : function (self, consumer) {
             
             t.ok(self == this, '`role` function is being called as the method of the parameter instance')
             
-            var methods = {}
+            var role = {
+                override : {}
+            }
             
-            if (this.param == 'value1')     methods.append = function (p1) { return p1 + '1' }
-            if (this.param == 'value2')     methods.append = function (p1) { return p1 + '2' }
-        
-            return Role({
-                methods : methods
+            consumer.meta.getMethods().each(function (method, name) {
+                
+                if (self.regex.test(name)) role.override[ name ] = function () {
+                    log.push('override [' + name + '] - before')
+                    
+                    var res = this.SUPERARG(arguments)
+                    
+                    log.push('override [' + name + '] - after')
+                    
+                    return res
+                }
             })
+            
+            return role
         }})
         
         
-        Class('ClassName1', {
-            does : Parameterized.Role({ param : 'value1' })
-        })         
-
+        Class('ClassName', {
+            
+            does : Parameterized.Role({ regex : /^doT.+/ }),
+            
+            methods : {
+                
+                doThis : function () {
+                    return 'this'
+                },
+                
+                doThat  : function () {
+                    return 'that'
+                }
+            }
+        })
         
-        Class('ClassName2', {
-            does : Parameterized.Role({ param : 'value2' })
-        })         
+        var instance = new ClassName()
+        
+        t.ok(instance, '`ClassName` was instantiated')
+        
+        t.ok(instance.doThis() == 'this', '`doThis` method works as expected')
+        t.ok(instance.doThat() == 'that', '`doThat` method works as expected')
+        
+        t.ok(log.length == 4, 'Correct log received')
+        
+        t.ok(log[0] == 'override [doThis] - before', 'Override is correct #1')
+        t.ok(log[1] == 'override [doThis] - after', 'Override is correct #2')
+        t.ok(log[2] == 'override [doThat] - before', 'Override is correct #3')
+        t.ok(log[3] == 'override [doThat] - after', 'Override is correct #4')
+        
+
         
         t.endAsync(async0)
     })

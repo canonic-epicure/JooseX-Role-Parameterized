@@ -4,12 +4,12 @@ StartTest(function(t) {
     
     var async0 = t.beginAsync()
     
-    use('JooseX.Meta.Parameterized', function () {
+    use('JooseX.Role.Parameterized', function () {
         
         //======================================================================================================================================================================================================================================================
         t.diag('Sanity')
         
-        t.ok(JooseX.Meta.Parameterized, "JooseX.Meta.Parameterized is here")
+        t.ok(JooseX.Role.Parameterized, "JooseX.Role.Parameterized is here")
         
         
         Role('SomeTrait')
@@ -17,7 +17,7 @@ StartTest(function(t) {
 
         Role('Parameterized.Role', {
             
-            meta : JooseX.Meta.Parameterized,
+            meta : JooseX.Role.Parameterized,
             
             has : {
                 param : null
