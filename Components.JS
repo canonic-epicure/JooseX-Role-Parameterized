@@ -1,7 +1,7 @@
 COMPONENTS = {
-	// a comment
-	
+    
 	"Core" : [
-		"JooseX.Meta.Parameterized"
+        "JooseX.Role.Parameterized.Initializer",
+		"JooseX.Role.Parameterized"
 	]
 }
