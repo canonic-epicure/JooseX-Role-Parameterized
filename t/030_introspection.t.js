@@ -1,6 +1,6 @@
 StartTest(function(t) {
     
-	t.plan(10)
+    t.plan(10)
     
     var async0 = t.beginAsync()
     
@@ -18,7 +18,7 @@ StartTest(function(t) {
             
             meta : JooseX.Role.Parameterized,
             
-            has : {
+            parameter : {
                 regex   : null
             },
             
@@ -46,7 +46,7 @@ StartTest(function(t) {
                 }
             })
             
-            return role
+            return Role(role)
         }})
         
         

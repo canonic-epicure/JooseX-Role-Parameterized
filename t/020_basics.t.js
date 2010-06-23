@@ -19,7 +19,7 @@ StartTest(function(t) {
             
             meta : JooseX.Role.Parameterized,
             
-            has : {
+            parameter : {
                 param : null
             },
             
