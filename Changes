@@ -1,6 +1,8 @@
 Release history for JooseX.Role.Parameterized
 
 {{$NEXT}}
+        
+        Fixes the requirements format in META.json
 
 0.01      2010-06-23 08:27
 
