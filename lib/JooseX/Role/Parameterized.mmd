@@ -144,9 +144,9 @@ When this parameter is `false`, the role will be calculated immediately (before 
 and consuming class won't be passed into `role` function. Such role *can* contain traits.
 
 When this parameter is `true`, the role calculation will be deferred as much as possible, allowing you to introspect
-the consuming class. The traits from such role *will be ignored*. 
+the consuming class. The traits from such role *will be ignored* (as the class was already created at this stage). 
 
-**NOTE**: During role calculation, the class will only contain properties, defined in itself (or its superclasses). 
+**NOTE**: During role calculation, the consuming class will only contain properties, defined in itself (or its superclasses). 
 The properties provided from roles aren't consumed yet on this stage.
 
 
