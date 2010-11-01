@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+	<head>
+		<link type="text/css" rel="stylesheet" href="http://bit.ly/multi_markdown_style_css " />
+	</head>
+<body>
+<h1 id="name">Name</h1>
+
+<p>JooseX.Role.Parameterized - Implementation of parameterized roles for Joose </p>
+
+<h1 id="synopsis">SYNOPSIS</h1>
+
+<pre><code>    Role('Logger', {
+        meta : JooseX.Role.Parameterized,
+
+        parameter : {
+            logMethodsMatching   : null
+        },
+
+        introspect : true,
+
+
+    role : function (self, consumer) {
+        // self == this here
+
+        var role = {
+            override : {}
+        }
+
+        consumer.meta.getMethods().each(function (method, name) {
+
+            if (self.logMethodsMatching.test(name)) role.override[ name ] = function () {
+                console.log('Call to method [' + name + '] - with arguments [' + arguments + ']')
+
+                var res = this.SUPERARG(arguments)
+
+                console.log('Returned result [' + res + ']')
+
+                return res
+            }
+        })
+
+        return role
+    }})
+
+
+    Class('ClassName', {
+
+        does : Logger({ logMethodsMatching : /^doT.+/ }),
+
+        methods : {
+
+            dontLogMe : function () {
+                ...
+            },
+
+            doThis : function () {
+                return 'this'
+            },
+
+            doThat  : function () {
+                return 'that'
+            }
+        }
+    })
+</code></pre>
+
+<h1 id="motivation">MOTIVATION</h1>
+
+<p>Roles are composable units of behavior. They are useful for factoring out functionality common to many classes from 
+any part of your class hierarchy. See <a href="http://openjsan.org/go/?l=Joose.Manual.Roles">Joose.Manual.Role</a> for an 
+introduction to Roles in Joose.</p>
+
+<p>While combining roles affords you a great deal of flexibility, individual roles have very little in the way of 
+configurability. Core Joose provides <code>alias</code> for renaming methods and <code>exclude</code> for ignoring methods. 
+These options are primarily (perhaps solely) for resolving role conflicts.</p>
+
+<p>Because roles serve many different masters, they usually provide only the least common denominator of functionality. 
+To empower roles further, more configurability than alias and excludes is required. Perhaps your role needs to know 
+which method to call when it is done. Or what default value to use for its <code>url</code> attribute, etc.</p>
+
+<p>Parameterized roles offer a solution to these (and other) kinds of problems.</p>
+
+<h1 id="usage">USAGE</h1>
+
+<h2 id="declaration">Declaration</h2>
+
+<p>To declare a parameterized role, specify the <code>JooseX.Role.Parameterized</code> as a metaclass for it (see Synopsis above).</p>
+
+<p>This metaclass provides the following additional builders:</p>
+
+<h3 id="role">role</h3>
+
+<p>This builder accepts a function, which should calculate the actual role and return it. The 1st argument to this function
+will be an initializer instance, containing parameters provided during consumption. This function will be also called
+in its scope (<code>this</code> will be equal to initializer instance as well), so you can treat it as a method of initializer.</p>
+
+<pre><code>    role : function (self, consumer?) {
+        // self == this
+
+        if (self.someParameter) ...
+
+        if (this.anotherParameter) ...
+    }
+</code></pre>
+
+<p>Depending from <code>introspect</code> builder, this function can also receive a 2nd argument, which will contain a class, consuming
+this role.</p>
+
+<p>The returning value from this function can be an anonymous Role or just the config object which will be passed to <code>Role</code> helper
+automatically.</p>
+
+<pre><code>    role : function (self) {
+        return {
+            trait   : SomeTrait,
+
+            methods : methods
+        }
+    }
+
+    // or
+
+    role : function (self) {
+        return Role({
+            trait   : SomeTrait,
+
+            methods : methods
+        })
+    }
+</code></pre>
+
+<h3 id="parameter">parameter</h3>
+
+<p>Declares a parameter for role. Acts exactly as usual <code>has</code> builder (its just an alias actually). 
+Parameterized roles can declare arbitrary parameters, which can be provided during consumption.</p>
+
+<h3 id="introspect">introspect</h3>
+
+<p>A boolean value, indicating, whether the role needs to introspect the consuming class. Defaults to <strong>false</strong>.</p>
+
+<p>When this parameter is <code>false</code>, the role will be calculated immediately (before the consuming class will be created), 
+and consuming class won't be passed into <code>role</code> function. Such role <em>can</em> contain traits.</p>
+
+<p>When this parameter is <code>true</code>, the role calculation will be deferred as much as possible, allowing you to introspect
+the consuming class. The traits from such role <em>will be ignored</em> (as the class was already created at this stage). </p>
+
+<p><strong>NOTE</strong>: During role calculation, the consuming class will only contain properties, defined in itself (or its superclasses). 
+The properties provided from roles aren't consumed yet on this stage.</p>
+
+<h2 id="consumption">Consumption</h2>
+
+<p>To consume a parameterized role, just use its constructor with the parameters provided as during class instantiation:</p>
+
+<pre><code>    Class('ClassName', {
+
+        does : Logger({ logMethodsMatching : /^doT.+/ })
+    })
+</code></pre>
+
+<p>Compare with static roles consumption:        </p>
+
+<pre><code>    Class('ClassName', {
+
+        does : Logger
+    })
+</code></pre>
+
+<h1 id="mutability">MUTABILITY</h1>
+
+<p>Currently, parameterized role won't be re-calculated when consuming class mutates. It will keep the state of the 1st
+consumption. This may change in future versions.</p>
+
+<h1 id="gettinghelp">GETTING HELP</h1>
+
+<p>This extension is supported via github issues tracker: <a href="http://github.com/SamuraiJack/JooseX-Role-Parameterized/issues">http://github.com/SamuraiJack/JooseX-Role-Parameterized/issues</a></p>
+
+<p>For general Joose questions you can also visit <a href="http://webchat.freenode.net/?randomnick=1&amp;channels=joose&amp;prompt=1">#joose</a> 
+on irc.freenode.org or the forum at: <a href="http://joose.it/forum">http://joose.it/forum</a></p>
+
+<h1 id="seealso">SEE ALSO</h1>
+
+<p>Web page of this module: <a href="http://github.com/SamuraiJack/JooseX-Role-Parameterized/">http://github.com/SamuraiJack/JooseX-Role-Parameterized/</a></p>
+
+<p>General documentation for Joose: <a href="http://Joose.github.com/Joose">http://Joose.github.com/Joose</a></p>
+
+<h1 id="bugs">BUGS</h1>
+
+<p>All complex software has bugs lurking in it, and this module is no exception.</p>
+
+<p>Please report any bugs through the web interface at <a href="http://github.com/SamuraiJack/JooseX-Role-Parameterized/issues">http://github.com/SamuraiJack/JooseX-Role-Parameterized/issues</a></p>
+
+<h1 id="authors">AUTHORS</h1>
+
+<p>Nickolay Platonov <a href="&#109;&#x61;&#105;&#108;&#116;&#111;:&#x6E;&#112;&#x6C;&#97;&#116;&#x6F;&#x6E;&#x6F;&#x76;&#64;&#99;p&#x61;&#110;&#46;o&#114;&#103;">&#x6E;&#112;&#x6C;&#97;&#116;&#x6F;&#x6E;&#x6F;&#x76;&#64;&#99;p&#x61;&#110;&#46;o&#114;&#103;</a></p>
+
+<p>Heavily based on the original content of MooseX::Role::Parameterized, by Shawn M Moore <a href="ma&#105;&#x6C;&#116;&#111;:&#115;&#x61;r&#x74;&#x61;&#107;&#64;&#103;&#109;&#97;i&#108;&#x2E;&#x63;&#111;m">&#115;&#x61;r&#x74;&#x61;&#107;&#64;&#103;&#109;&#97;i&#108;&#x2E;&#x63;&#111;m</a></p>
+
+<h1 id="copyrightandlicense">COPYRIGHT AND LICENSE</h1>
+
+<p>This software is Copyright (c) 2010 by Nickolay Platonov <a href="&#109;&#x61;i&#108;&#x74;&#111;:&#110;p&#108;&#x61;&#116;&#x6F;&#110;&#x6F;&#x76;&#64;&#x63;&#112;&#97;&#110;&#x2E;&#111;&#x72;&#x67;">&#110;p&#108;&#x61;&#116;&#x6F;&#110;&#x6F;&#x76;&#64;&#x63;&#112;&#97;&#110;&#x2E;&#111;&#x72;&#x67;</a>.</p>
+
+<p>This is free software, licensed under:</p>
+
+<p>The GNU Lesser General Public License, Version 3, June 2007</p>
+</body>
+</html>
